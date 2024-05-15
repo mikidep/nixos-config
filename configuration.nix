@@ -12,6 +12,7 @@
     # ./prime.nix
     ./docker.nix
     # ./cosmic.nix
+    ./nixbuild.nix
   ];
   boot.loader = {
     # Bootloader.
@@ -62,15 +63,11 @@
       # xdg-desktop-portal-gtk
       xdg-desktop-portal-wlr
     ];
+    config.common.default = "*";
   };
 
   programs = {
     adb.enable = true;
-
-    hyprland = {
-      enable = true;
-      xwayland.enable = true;
-    };
 
     # Some programs need SUID wrappers, can be configured further or are
     # started in user sessions.
