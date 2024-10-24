@@ -12,7 +12,7 @@
     # ./prime.nix
     ./docker.nix
     # ./cosmic.nix
-    ./nixbuild.nix
+    # ./nixbuild.nix
   ];
   boot.loader = {
     # Bootloader.
@@ -37,7 +37,7 @@
   ];
 
   # Set your time zone.
-  # time.timeZone = "Europe/Tallinn";
+  time.timeZone = "Europe/Tallinn";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -81,13 +81,14 @@
   };
   hardware = {
     bluetooth.enable = true;
-    opengl = {
+    graphics = {
       # Enable OpenGL
       enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
       extraPackages = with pkgs; [
         rocmPackages.clr.icd
+        libvdpau-va-gl
+        vaapiVdpau
+        mesa
       ];
     };
 
@@ -119,8 +120,6 @@
     };
   };
 
-  # Enable sound with pipewire.
-  sound.enable = true;
   security = {
     polkit.enable = true;
     sudo.extraConfig = ''
@@ -153,7 +152,7 @@
   nixpkgs.config.allowUnfree = true;
 
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixVersions.stable;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -176,15 +175,17 @@
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     systemPackages = with pkgs; [
+      idevicerestore
+      libimobiledevice
       vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     ];
   };
+
   services = {
     # List services that you want to enable:
     # Enable the X11 windowing system.
     # services.xserver.enable = true;
     flatpak.enable = true;
-    automatic-timezoned.enable = true;
 
     # Enable the GNOME Desktop Environment.
     # xserver.displayManager.gdm.enable = true;
@@ -219,6 +220,8 @@
     # Load nvidia driver for Xorg and Wayland
     # xserver.videoDrivers = ["nvidia"];
 
+    usbmuxd.enable = true;
+    usbmuxd.package = pkgs.usbmuxd2;
     blueman.enable = true;
     pipewire = {
       enable = true;
