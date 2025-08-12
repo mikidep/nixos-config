@@ -4,6 +4,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   imports = [
@@ -12,7 +13,7 @@
     # ./prime.nix
     ./docker.nix
     # ./cosmic.nix
-    # ./nixbuild.nix
+    ./nixbuild.nix
   ];
   boot.loader = {
     # Bootloader.
@@ -23,21 +24,26 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   # boot.plymouth.enable = true;
   # boot.crashDump.enable = true;
-  networking.hostName = "nixos"; # Define your hostname.
+  # Define your hostname.
+  networking.hostName = "nixos";
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable networking
-  networking.networkmanager.enable = true;
-  networking.networkmanager.plugins = [
-    pkgs.networkmanager-openvpn
-  ];
+  networking.networkmanager = {
+    # Enable networking
+    enable = true;
+    plugins = [
+      pkgs.networkmanager-openvpn
+    ];
+    wifi.powersave = false;
+  };
 
   # Set your time zone.
-  time.timeZone = "Europe/Tallinn";
+  # time.timeZone = "Europe/Tallinn";
+  services.automatic-timezoned.enable = true;
+  services.geoclue2.geoProviderUrl = "https://api.beacondb.net/v1/geolocate";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -56,7 +62,7 @@
   };
 
   # Configure console keymap
-  console.keyMap = "it";
+  console.keyMap = "us";
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
@@ -153,14 +159,19 @@
 
   nix = {
     package = pkgs.nixVersions.stable;
+    gc = {
+      automatic = true;
+      options = "--delete-older-than 7d";
+      randomizedDelaySec = "60min";
+    };
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
-    # settings = {
-    #   substituters = lib.mkBefore ["https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"];
-    #   trusted-users = ["mikidep"];
-    #   require-sigs = false;
-    # };
+    settings = {
+      # substituters = lib.mkBefore ["https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"];
+      trusted-users = ["mikidep"];
+      # require-sigs = false;
+    };
   };
   environment = {
     sessionVariables = {
@@ -170,7 +181,7 @@
       NIXOS_OZONE_WL = "1";
     };
 
-    shells = with pkgs; [zsh fish];
+    shells = with pkgs; [bash fish];
 
     # List packages installed in system profile. To search, run:
     # $ nix search wget
@@ -203,15 +214,13 @@
     printing.enable = true;
 
     udev.extraRules = ''
-      ACTION=="add" SUBSYSTEM=="pci" ATTR{vendor}=="0x0461" ATTR{device}=="0x3f41" ATTR{power/wakeup}="enabled"
     '';
 
     greetd = {
       enable = true;
       settings = {
         default_session = {
-          # command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd Hyprland";
-          command = ''${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd sway'';
+          command = ''${lib.getExe pkgs.greetd.tuigreet} --time --asterisks --cmd sway'';
           user = "greeter";
         };
       };
@@ -236,7 +245,10 @@
       #media-session.enable = true;
     };
 
+    pcscd.enable = true;
+
     upower.enable = true;
+    logind.lidSwitchExternalPower = "ignore";
   };
 
   # Enable the OpenSSH daemon.
