@@ -4,16 +4,14 @@
 {
   config,
   pkgs,
-  lib,
   ...
 }: {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    # ./prime.nix
     ./docker.nix
-    # ./cosmic.nix
     ./nixbuild.nix
+    ./desktop.nix
   ];
   boot.loader = {
     # Bootloader.
@@ -26,10 +24,6 @@
   # boot.crashDump.enable = true;
   # Define your hostname.
   networking.hostName = "nixos";
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   networking.networkmanager = {
     # Enable networking
@@ -63,25 +57,9 @@
 
   # Configure console keymap
   console.keyMap = "us";
-  xdg.portal = {
-    enable = true;
-    extraPortals = with pkgs; [
-      # xdg-desktop-portal-gtk
-      xdg-desktop-portal-wlr
-    ];
-    config.common.default = "*";
-  };
 
   programs = {
     adb.enable = true;
-
-    # Some programs need SUID wrappers, can be configured further or are
-    # started in user sessions.
-    # programs.mtr.enable = true;
-    # programs.gnupg.agent = {
-    #   enable = true;
-    #   enableSSHSupport = true;
-    # };
 
     fish.enable = true;
   };
@@ -94,7 +72,7 @@
         rocmPackages.clr.icd
         libvdpau-va-gl
         vaapiVdpau
-        mesa
+        # mesa
       ];
     };
 
@@ -170,17 +148,9 @@
     settings = {
       # substituters = lib.mkBefore ["https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"];
       trusted-users = ["mikidep"];
-      # require-sigs = false;
     };
   };
   environment = {
-    sessionVariables = {
-      # If your cursor becomes invisible
-      WLR_NO_HARDWARE_CURSORS = "1";
-      # Hint electron apps to use wayland
-      NIXOS_OZONE_WL = "1";
-    };
-
     shells = with pkgs; [bash fish];
 
     # List packages installed in system profile. To search, run:
@@ -198,36 +168,10 @@
     # services.xserver.enable = true;
     flatpak.enable = true;
 
-    # Enable the GNOME Desktop Environment.
-    # xserver.displayManager.gdm.enable = true;
-    # services.xserver.desktopManager.gnome.enable = true;
-
-    # Configure keymap in X11
-    # services.xserver = {
-    #   layout = "it";
-    #   xkbVariant = "";
-    # };
-
     udisks2.enable = true;
 
     # Enable CUPS to print documents.
     printing.enable = true;
-
-    udev.extraRules = ''
-    '';
-
-    greetd = {
-      enable = true;
-      settings = {
-        default_session = {
-          command = ''${lib.getExe pkgs.greetd.tuigreet} --time --asterisks --cmd sway'';
-          user = "greeter";
-        };
-      };
-    };
-
-    # Load nvidia driver for Xorg and Wayland
-    # xserver.videoDrivers = ["nvidia"];
 
     usbmuxd.enable = true;
     usbmuxd.package = pkgs.usbmuxd2;
@@ -239,26 +183,13 @@
       pulse.enable = true;
       # If you want to use JACK applications, uncomment this
       #jack.enable = true;
-
-      # use the example session manager (no others are packaged yet so this is enabled by default,
-      # no need to redefine it in your config for now)
-      #media-session.enable = true;
     };
 
     pcscd.enable = true;
 
     upower.enable = true;
-    logind.lidSwitchExternalPower = "ignore";
+    logind.settings.Login.HandleLidSwitchExternalPower = "ignore";
   };
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
