@@ -8,6 +8,8 @@
     ./hardware-custom.nix
     ./nixbuild.nix
     ./desktop.nix
+    ./steam.nix
+    # ./docker.nix
   ];
   boot.loader = {
     # Bootloader.
@@ -15,7 +17,13 @@
     efi.canTouchEfiVariables = true;
     systemd-boot.configurationLimit = 5;
   };
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  # This is needed for less-than-standard USB devices such as
+  # ROLI Seaboard M, cf.
+  # https://urukrama.wordpress.com/2009/01/27/usb-drive-not-recognised-error-71/
+  # boot.extraModprobeConfig = ''
+  #   options usbcore use_both_schemes=y
+  # '';
   # boot.plymouth.enable = true;
   # boot.crashDump.enable = true;
   # Define your hostname.
@@ -34,6 +42,8 @@
   # time.timeZone = "Europe/Tallinn";
   services.automatic-timezoned.enable = true;
   services.geoclue2.geoProviderUrl = "https://api.beacondb.net/v1/geolocate";
+
+  services.power-profiles-daemon.enable = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -114,6 +124,8 @@
       idevicerestore
       libimobiledevice
       vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+      usbutils
+      pciutils
     ];
   };
 
