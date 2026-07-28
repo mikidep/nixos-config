@@ -65,7 +65,6 @@
   console.keyMap = "us";
 
   programs = {
-    adb.enable = true;
     fish.enable = true;
   };
   hardware = {
